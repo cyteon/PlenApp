@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@import "@catppuccin/tailwindcss/mocha.css";
+
+* {
+    transition: all 0.2s ease-in-out;
+    @apply border-ctp-surface2;
+}
+
+input:hover, textarea:hover {
+    outline: none;
+
+    @apply border-ctp-blue;
+}
