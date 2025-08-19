@@ -30,7 +30,7 @@
             }
 
             const data = await res.json();
-            
+
             store.then(store => {
                 store.set("token", data.token);
             });
@@ -75,19 +75,27 @@
             error = err.message;
         }
     }
+
+
+    let kbVisible: boolean = false;
 </script>
 
-<div class="flex h-full">
+<div class="flex h-full px-4">
     <h1 class="absolute top-18 left-0 text-3xl font-bold w-full text-center">
         Plen - Flight Tracking
     </h1>
 
-    <div class="my-auto w-full">
+    <div 
+        class="my-auto w-full"
+        style:transform={kbVisible ? 'translateY(-120px)' : 'translateY(0)'}
+    >
         <input 
             type="text" 
             placeholder="Enter email" 
             class="w-full p-2 mb-2 border rounded-md text-xl" 
             bind:value={email} 
+            on:focus={() => kbVisible = true}
+            on:blur={() => kbVisible = false}
         />
 
         <input 
@@ -95,6 +103,8 @@
             placeholder="Enter password" 
             class="w-full p-2 mb-2 border rounded-md text-xl" 
             bind:value={password} 
+            on:focus={() => kbVisible = true}
+            on:blur={() => kbVisible = false}
         />
 
         {#if error}

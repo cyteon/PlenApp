@@ -6,8 +6,7 @@
     @apply border-ctp-surface2;
 }
 
-input:hover, textarea:hover {
+input:focus, input:active {
     outline: none;
-
     @apply border-ctp-blue;
 }

@@ -4,6 +4,7 @@
     "": {
       "name": "plenapp",
       "dependencies": {
+        "@lucide/svelte": "^0.540.0",
         "@tailwindcss/vite": "^4.1.12",
         "@tauri-apps/api": "^2",
         "@tauri-apps/plugin-opener": "^2",
@@ -89,6 +90,8 @@
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.30", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-GQ7Nw5G2lTu/BtHTKfXhKHok2WGetd4XYcVKGx00SjAk8GMwgJM3zr6zORiPGuOE+/vkc90KtTosSSvaCjKb2Q=="],
+
+    "@lucide/svelte": ["@lucide/svelte@0.540.0", "", { "peerDependencies": { "svelte": "^5" } }, "sha512-tukbz1g9SFRPx5t7LANLhHgoy/Rkd7LQjwMaBavQgtw1FcYeAc2r0oYjx/pATY1ymU92ROkkofU9WKkwmxIppg=="],
 
     "@polka/url": ["@polka/url@1.0.0-next.29", "", {}, "sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww=="],
 

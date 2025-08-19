@@ -8,7 +8,6 @@
 
     onMount(async () => {
         let token = await (await store).get("token");
-        console.log("Token from store:", token);
         
         if (!token) {
             goto("/login");
@@ -22,15 +21,12 @@
                     }
                 });
 
-                console.log("Token verification response:", res);
-
                 if (!res.ok) {
                     store.then(store => store.set("token", null));
                     goto("/login");
                 }
             } catch (err) {
                 console.error("Error verifying token:", err);
-                store.then(store => store.set("token", null));
                 goto("/login");
             }
         }
