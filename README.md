@@ -1,7 +1,4 @@
-# Tauri + SvelteKit + TypeScript
+# PlenAPP
 
-This template should help get you started developing with Tauri, SvelteKit and TypeScript in Vite.
-
-## Recommended IDE Setup
-
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
+## Credits
+This project uses sprite images from the [tar1090 repository](https://github.com/wiedehopf/tar1090) under the GPL license. The images can be found in the [sprites.png](https://github.com/wiedehopf/tar1090/blob/master/html/images/sprites.png) file.
