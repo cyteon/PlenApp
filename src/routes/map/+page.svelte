@@ -60,6 +60,8 @@
     });
 
     planes.forEach(plane => {
+      if (!plane.latitude || !plane.longitude) return;
+
       const feature = new Feature({
         geometry: new Point(fromLonLat([plane.longitude, plane.latitude])),
         icao24: plane.icao24,
