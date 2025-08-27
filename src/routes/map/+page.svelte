@@ -22,6 +22,28 @@
 
   let selectPlaneLoaded: boolean = false;
   let selectedPlaneData: any = null;
+  let currentImageIndex: number = 0;
+
+  let touchStartX = 0;
+
+  function handleTouchStart(event: TouchEvent) {
+    touchStartX = event.touches[0].clientX;
+  }
+
+  function handleTouchEnd(event: TouchEvent) {
+    if (!selectedPlaneData?.images) return;
+    
+    const touchEndX = event.changedTouches[0].clientX;
+    const swipeDistance = touchStartX - touchEndX;
+    
+    if (Math.abs(swipeDistance) > 50) {
+      if (swipeDistance > 0 && currentImageIndex < selectedPlaneData.images.length - 1) {
+        currentImageIndex++;
+      } else if (swipeDistance < 0 && currentImageIndex > 0) {
+        currentImageIndex--;
+      }
+    }
+  }
 
   onMount(async () => {
     try {
@@ -69,7 +91,7 @@
 
       feature.setStyle(new Style({
         image: new Icon({
-          src: generatePlaneIcon(plane.category),
+          src: generatePlaneIcon(plane.iac),
           rotation: plane.trueTrack ? ((plane.trueTrack * Math.PI) / 180) : 0,
         }),
       }));
@@ -92,6 +114,7 @@
             });
 
             if (!res.ok) {
+              selectedPlaneData = null;
               throw new Error("Failed to fetch plane details");
             }
 
@@ -119,129 +142,183 @@
     <div class="absolute top-0 left-0 h-screen w-full bg-ctp-base flex flex-col">
       <div class="bg-ctp-mantle h-12"></div>
       
-      {#if selectPlaneLoaded}
-        <div class="p-4">
-          <div class="flex">
-            <button 
-              class="mr-4 mb-1.5"
-              on:click={() => {
-                selectedPlaneData = null;
-                selectPlaneLoaded = false;
-              }}
-            >
-              <ArrowBigLeft size={24} />
-            </button>
+      <div class="flex-1 overflow-y-auto">
+        {#if selectPlaneLoaded}
+          <div class="p-4">
+            <div class="flex">
+              <button 
+                class="mr-4 mb-1.5"
+                on:click={() => {
+                  selectedPlaneData = null;
+                  selectPlaneLoaded = false;
+                  currentImageIndex = 0;
+                }}
+              >
+                <ArrowBigLeft size={24} />
+              </button>
 
-            <h1 class="text-2xl font-bold ml-auto">{selectedPlaneData.callsign} ({selectedPlaneData.icao24})</h1>
-          </div>
+              <h1 class="text-2xl font-bold ml-auto">{selectedPlaneData.callsign} ({selectedPlaneData.icao24})</h1>
+            </div>
 
-          {#if selectedPlaneData.callsignData?.airline}
-            <p class="text-lg">
-              Operated by <span class="font-bold">{selectedPlaneData.callsignData?.airline.name}</span> 
-              from <span class="font-bold">{selectedPlaneData.callsignData?.airline.country || "Unknown"}</span>
-            </p>
-          {/if}
+            {#if selectedPlaneData.images.length > 0}
+              <div class="mt-4 relative">
+                <div 
+                  class="overflow-hidden rounded-lg"
+                  on:touchstart={handleTouchStart}
+                  on:touchend={handleTouchEnd}
+                >
+                  <div class="flex transition-transform duration-300 ease-out" style="transform: translateX(-{currentImageIndex * 100}%)">
+                    {#each selectedPlaneData.images as image}
+                      <img src={image} alt="Aircraft {selectedPlaneData.callsign}" class="w-full h-64 object-cover flex-shrink-0" />
+                    {/each}
+                  </div>
+                </div>
+                
+                {#if selectedPlaneData.images.length > 1}
+                  <div class="flex justify-center space-x-2 absolute bottom-3 left-1/2 transform -translate-x-1/2">
+                    {#each selectedPlaneData.images as _, index}
+                      <div class="w-2 h-2 rounded-full {index === currentImageIndex ? 'bg-white' : 'bg-ctp-base'}"></div>
+                    {/each}
+                  </div>
+                {/if}
+              </div>
+            {/if}
 
-          <div class="mt-8 space-x-2 text-center flex">
-            <div class="border rounded-md py-4 px-2 justify-center items-center w-full relative">
-              {#if selectedPlaneData.callsignData?.origin}
-                <h2 class="text-2xl font-bold">{selectedPlaneData.callsignData.origin.iata_code}</h2>
-                <p class="text-lg font-semibold">{selectedPlaneData.callsignData.origin.municipality}, {selectedPlaneData.callsignData.origin.country_name}</p>
-              {:else}
-                <h2 class="text-2xl font-bold">N/A</h2>
-                <p class="text-lg font-semibold">Origin Unknown</p>
-              {/if}
+            <div class="mt-6 space-x-2 text-center flex">
+              <div class="border rounded-md py-4 px-2 justify-center items-center w-full relative">
+                {#if selectedPlaneData.callsignData?.origin}
+                  <h2 class="text-2xl font-bold">{selectedPlaneData.callsignData.origin.iata_code}</h2>
+                  <p class="text-lg font-semibold">{selectedPlaneData.callsignData.origin.municipality}, {selectedPlaneData.callsignData.origin.country_name}</p>
+                {:else}
+                  <h2 class="text-2xl font-bold">N/A</h2>
+                  <p class="text-lg font-semibold">Origin Unknown</p>
+                {/if}
 
-              <div class="absolute top-[-12px] left-[-12px] rounded-full p-2 border bg-ctp-base">
-                <PlaneTakeoff size={22} />
+                <div class="absolute top-[-12px] left-[-12px] rounded-full p-2 border bg-ctp-base">
+                  <PlaneTakeoff size={22} />
+                </div>
+              </div>
+
+              <div class="border rounded-md py-4 px-2 justify-center items-center w-full relative">
+                {#if selectedPlaneData.callsignData?.destination}
+                  <h2 class="text-2xl font-bold">{selectedPlaneData.callsignData.destination.iata_code}</h2>
+                <p class="text-lg font-semibold">{selectedPlaneData.callsignData.destination.municipality}, {selectedPlaneData.callsignData.destination.country_name}</p>
+                {:else}
+                  <h2 class="text-2xl font-bold">N/A</h2>
+                  <p class="text-lg font-semibold">Destination Unknown</p>
+                {/if}
+
+                <div class="absolute top-[-12px] right-[-12px] rounded-full p-2 border bg-ctp-base">
+                  <PlaneLanding size={22} />
+                </div>
               </div>
             </div>
 
-            <div class="border rounded-md py-4 px-2 justify-center items-center w-full relative">
-              {#if selectedPlaneData.callsignData?.destination}
-                <h2 class="text-2xl font-bold">{selectedPlaneData.callsignData.destination.iata_code}</h2>
-              <p class="text-lg font-semibold">{selectedPlaneData.callsignData.destination.municipality}, {selectedPlaneData.callsignData.destination.country_name}</p>
-              {:else}
-                <h2 class="text-2xl font-bold">N/A</h2>
-                <p class="text-lg font-semibold">Destination Unknown</p>
-              {/if}
+            <hr class="my-4 border border-ctp-surface0!" />
 
-              <div class="absolute top-[-12px] right-[-12px] rounded-full p-2 border bg-ctp-base">
-                <PlaneLanding size={22} />
+            <div class="mt-2 grid grid-cols-2 gap-4 text-center">
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">Aircraft Type</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.icaoData?.model || "N/A"}</p>
+              </div>
+
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">Registration</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.icaoData?.registration || "N/A"}</p>
+              </div>
+
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">Age</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.icaoData?.year ? (new Date().getFullYear() - selectedPlaneData.icaoData.year).toString() + "y" : "N/A"}</p>
+              </div>
+
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">Serial Number</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.icaoData?.serialNumber || "N/A"}</p>
+              </div>
+
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">Reg. Country</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.icaoData?.country || "N/A"}</p>
+              </div>
+
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">Aircraft Class</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.icaoData?.icaoAircraftClass || "N/A"}</p>
+              </div>
+            </div>
+
+            <hr class="my-4 border border-ctp-surface0!" />
+
+            <div class="mt-2 grid grid-cols-2 gap-4 text-center">
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">Barometric Altitude</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.baroAltitude ? `${selectedPlaneData.baroAltitude.toFixed(0)} ft` : "N/A"}</p>
+              </div>
+
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">GPS Altitude</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.geoAltitude ? `${selectedPlaneData.geoAltitude.toFixed(0)} ft` : "N/A"}</p>
+              </div>
+
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">True Track</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.trueTrack ? `${selectedPlaneData.trueTrack.toFixed(0)}°` : "N/A"}</p> 
+              </div>
+
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">Velocity</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.velocity ? `${(selectedPlaneData.velocity).toFixed(0)} m/s` : "N/A"}</p>
+              </div>
+
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">Vertical Rate</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.verticalRate ? `${selectedPlaneData.verticalRate.toFixed(0)} m/s` : "N/A"}</p>
+              </div>
+
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">On Ground?</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.onGround ? "Yes" : "No"}</p>
+              </div>
+            </div>
+
+            <hr class="my-4 border border-ctp-surface0!" />
+
+            <div class="mt-2 grid grid-cols-2 gap-4 text-center">
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">Data Source</p>
+                <p class="font-semibold mx-auto text-lg">
+                  {selectedPlaneData.positionSource === 0 ? "ADS-B" 
+                    : (selectedPlaneData.positionSource === 1 ? "ASTERIX" 
+                      : (selectedPlaneData.positionSource === 2 ? "MLAT"
+                        : selectedPlaneData.positionSource === 3 ? "FLARM"
+                          : "Unknown"
+                  ))}
+                </p>
+              </div>
+
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">Squawk</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.squawk || "N/A"}</p>
+              </div>
+
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">Latitude</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.latitude ? selectedPlaneData.latitude : "N/A"}</p>
+              </div>
+
+              <div class="rounded-md p-2 border flex flex-col">
+                <p class="text-left">Longitude</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.longitude ? selectedPlaneData.longitude : "N/A"}</p>
               </div>
             </div>
           </div>
-
-          <hr class="my-4 border border-ctp-surface0!" />
-
-          <div class="mt-2 grid grid-cols-2 gap-4">
-            <div class="rounded-md p-2 border flex flex-col">
-              <p>Barometric Altitude</p>
-              <p class="font-semibold mx-auto text-lg">{selectedPlaneData.baroAltitude ? `${selectedPlaneData.baroAltitude.toFixed(0)} ft` : "N/A"}</p>
-            </div>
-
-            <div class="rounded-md p-2 border flex flex-col">
-              <p>GPS Altitude</p>
-              <p class="font-semibold mx-auto text-lg">{selectedPlaneData.geoAltitude ? `${selectedPlaneData.geoAltitude.toFixed(0)} ft` : "N/A"}</p>
-            </div>
-
-            <div class="rounded-md p-2 border flex flex-col">
-              <p>True Track</p>
-              <p class="font-semibold mx-auto text-lg">{selectedPlaneData.trueTrack ? `${selectedPlaneData.trueTrack.toFixed(0)}°` : "N/A"}</p> 
-            </div>
-
-            <div class="rounded-md p-2 border flex flex-col">
-              <p>Velocity</p>
-              <p class="font-semibold mx-auto text-lg">{selectedPlaneData.velocity ? `${(selectedPlaneData.velocity).toFixed(0)} m/s` : "N/A"}</p>
-            </div>
-
-            <div class="rounded-md p-2 border flex flex-col">
-              <p>Vertical Rate</p>
-              <p class="font-semibold mx-auto text-lg">{selectedPlaneData.verticalRate ? `${selectedPlaneData.verticalRate.toFixed(0)} m/s` : "N/A"}</p>
-            </div>
-
-            <div class="rounded-md p-2 border flex flex-col">
-              <p>On Ground?</p>
-              <p class="font-semibold mx-auto text-lg">{selectedPlaneData.onGround ? "Yes" : "No"}</p>
-            </div>
+        {:else}
+          <div class="m-auto p-4">
+            <p>Loading...</p>
           </div>
-
-          <hr class="my-4 border border-ctp-surface0!" />
-
-          <div class="mt-2 grid grid-cols-2 gap-4">
-            <div class="rounded-md p-2 border flex flex-col">
-              <p>Data Source</p>
-              <p class="font-semibold mx-auto text-lg">
-                {selectedPlaneData.positionSource === 0 ? "ADS-B" 
-                  : (selectedPlaneData.positionSource === 1 ? "ASTERIX" 
-                    : (selectedPlaneData.positionSource === 2 ? "MLAT"
-                      : selectedPlaneData.positionSource === 3 ? "FLARM"
-                        : "Unknown"
-                ))}
-              </p>
-            </div>
-
-            <div class="rounded-md p-2 border flex flex-col">
-              <p>Squawk</p>
-              <p class="font-semibold mx-auto text-lg">{selectedPlaneData.squawk || "N/A"}</p>
-            </div>
-
-            <div class="rounded-md p-2 border flex flex-col">
-              <p>Latitude</p>
-              <p class="font-semibold mx-auto text-lg">{selectedPlaneData.latitude ? selectedPlaneData.latitude : "N/A"}</p>
-            </div>
-
-            <div class="rounded-md p-2 border flex flex-col">
-              <p>Longitude</p>
-              <p class="font-semibold mx-auto text-lg">{selectedPlaneData.longitude ? selectedPlaneData.longitude : "N/A"}</p>
-            </div>
-          </div>
-        </div>
-      {:else}
-        <div class="m-auto p-4">
-          <p>Loading...</p>
-        </div>
-      {/if}
+        {/if}
+      </div>
     </div>
   {/if}
 </main>
