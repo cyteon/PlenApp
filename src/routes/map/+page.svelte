@@ -91,7 +91,7 @@
 
       feature.setStyle(new Style({
         image: new Icon({
-          src: generatePlaneIcon(plane.iac),
+          src: generatePlaneIcon(plane.iac, plane.em),
           rotation: plane.trueTrack ? ((plane.trueTrack * Math.PI) / 180) : 0,
         }),
       }));
@@ -253,12 +253,12 @@
             <div class="mt-2 grid grid-cols-2 gap-4 text-center">
               <div class="rounded-md p-2 border flex flex-col">
                 <p class="text-left">Barometric Altitude</p>
-                <p class="font-semibold text-lg">{selectedPlaneData.baroAltitude ? `${selectedPlaneData.baroAltitude.toFixed(0)} ft` : "N/A"}</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.baroAltitude ? `${(selectedPlaneData.baroAltitude * 3.2808).toFixed(0) } ft` : "N/A"}</p>
               </div>
 
               <div class="rounded-md p-2 border flex flex-col">
                 <p class="text-left">GPS Altitude</p>
-                <p class="font-semibold text-lg">{selectedPlaneData.geoAltitude ? `${selectedPlaneData.geoAltitude.toFixed(0)} ft` : "N/A"}</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.geoAltitude ? `${(selectedPlaneData.geoAltitude * 3.2808).toFixed(0)} ft` : "N/A"}</p>
               </div>
 
               <div class="rounded-md p-2 border flex flex-col">
@@ -268,7 +268,7 @@
 
               <div class="rounded-md p-2 border flex flex-col">
                 <p class="text-left">Velocity</p>
-                <p class="font-semibold text-lg">{selectedPlaneData.velocity ? `${(selectedPlaneData.velocity).toFixed(0)} m/s` : "N/A"}</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.velocity ? `${(selectedPlaneData.velocity * 1.94384).toFixed(0)} ktsz` : "N/A"}</p>
               </div>
 
               <div class="rounded-md p-2 border flex flex-col">
@@ -299,7 +299,9 @@
 
               <div class="rounded-md p-2 border flex flex-col">
                 <p class="text-left">Squawk</p>
-                <p class="font-semibold text-lg">{selectedPlaneData.squawk || "N/A"}</p>
+                <p class={"font-semibold text-lg " + (selectedPlaneData.squawk === "7500" || selectedPlaneData.squawk === "7600" || selectedPlaneData.squawk === "7700" ? "text-ctp-red" : "")} >
+                  {selectedPlaneData.squawk || "N/A"}
+                </p>
               </div>
 
               <div class="rounded-md p-2 border flex flex-col">

@@ -89,7 +89,7 @@ const shapes = {
 }
 
 
-export default function generatePlaneIcon(iac: string) {
+export default function generatePlaneIcon(iac: string, em: boolean = false): string {
     let shape = shapes[iac];
 
     if (iac) {
@@ -113,7 +113,7 @@ export default function generatePlaneIcon(iac: string) {
     }
 
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${shape.viewBox}" width="${shape.w}" height="${shape.h}">
-        <path d="${shape.path}" fill="yellow" stroke="black" stroke-width="${shape.strokeScale}" />
+        <path d="${shape.path}" fill="${em ? 'red' : 'yellow' }" stroke="black" stroke-width="${shape.strokeScale}" />
     </svg>`;
 
     const svgBase64 = `data:image/svg+xml;base64,${btoa(svg)}`;
