@@ -1,7 +1,7 @@
 <script lang="ts">
-    import storePromise from "$lib/store";
+  import storePromise from "$lib/store";
   import Navbar from "$lib/ui/navbar.svelte";
-    import { ArrowBigLeft } from "@lucide/svelte";
+  import { ArrowBigLeft, PlaneLanding, PlaneTakeoff } from "@lucide/svelte";
 
   let kbVisible: boolean = false;
 
@@ -49,8 +49,8 @@
   }
 </script>
 
-<main class="flex flex-col flex-1">
-  <div class="p-4 pb-2 flex flex-col h-full">
+<main class="flex flex-col h-[calc(100vh-3rem)] w-full">
+  <div class="p-4 pb-2 flex flex-col h-full min-h-0">
     {#if !searched && !kbVisible}
       <h1 class="text-2xl font-bold">My Flights ✈️</h1>
 
@@ -59,7 +59,7 @@
 
     <div class={"duration-500 " + (searched || kbVisible ? "h-0" : "h-full")}></div>
 
-    <div class="flex">
+    <div class="flex flex-shrink-0">
       {#if searched}
         <button 
           class="mr-4 mb-1.5"
@@ -74,7 +74,7 @@
 
       <input 
         type="text" 
-        placeholder="Search for callsign / tail number / airport / airline" 
+        placeholder="Search for callsign / tail number / airline" 
         class="w-full p-2 mb-2 border rounded-md text-lg truncate"
         bind:value={searchQuery}
         on:focus={() => kbVisible = true}
@@ -96,66 +96,65 @@
 
     {#if searched}
       {#if result}
-        {#if result.aircraft}
-          <div class="px-4 pt-2 pb-4 rounded-md bg-ctp-mantle mt-2 border">
-            <div class="flex">
-              <h2 class="text-xl font-semibold">{result.aircraft.registration}</h2>
-              <p class="text-lg ml-auto">
-                {result.aircraft.manufacturer} {result.aircraft.type}
+        <div class="flex flex-col overflow-y-auto">
+          {#if result.aircraft}
+            <div class="px-4 py-2 rounded-md bg-ctp-mantle mt-2 border">
+              <div class="flex">
+                <h2 class="text-xl font-semibold">{result.aircraft.registration}</h2>
+                <p class="text-lg ml-auto">
+                  {result.aircraft.manufacturer} {result.aircraft.icao_type}
+                </p>
+              </div>
+              
+              <p class="text-lg mt-1">
+                Owned by {result.aircraft.registered_owner}
+              </p>
+
+              {#if result.aircraft.url_photo}
+                <img 
+                  src={result.aircraft.url_photo} 
+                  alt="Aircraft_Image" 
+                  class="mt-2 rounded-md w-full h-auto"
+                />
+              {/if}
+            </div>
+          {/if}
+
+          {#if result.callsign}
+            <div class="px-4 py-2 rounded-md bg-ctp-mantle mt-2 border">
+              <h2 class="text-xl font-semibold">{result.callsign.callsign_icao} / {result.callsign.callsign_iata || "no iata"}</h2>
+              
+              <p class="text-lg mt-1">
+                Operated by {result.callsign.airline.name} ({result.callsign.airline.iata || "no iata"} / {result.callsign.airline.icao || "no icao"})
+              </p>
+
+              <br />
+
+              <p class="text-lg flex">
+                <PlaneTakeoff class="mr-2" /> {result.callsign.origin.municipality} ({result.callsign.origin.iata_code})
+              </p>
+
+              <p class="text-lg flex">
+                <PlaneLanding class="mr-2" /> {result.callsign.destination.municipality} ({result.callsign.destination.iata_code})
               </p>
             </div>
-            
-            <p class="text-lg mt-1">
-              Operated by {result.aircraft.registered_owner} ({result.aircraft.registered_owner_operator_flag_code})
-            </p>
+          {/if}
 
-            <p class="text-lg">
-              Registered in {result.aircraft.registered_owner_country_name} ({result.aircraft.registered_owner_country_iso_name})
-            </p>
+          {#each result.airlines as airline}
+            <div class="px-4 py-2 border rounded-md bg-ctp-mantle mt-2">
+              <h2 class="font-semibold text-xl">{airline.name}</h2>
 
-            <img 
-              src={result.aircraft.url_photo} 
-              alt="Aircraft_Image" 
-              class="mt-2 rounded-md w-full h-auto"
-            />
-          </div>
-        {/if}
+              {#if airline.alias}
+                <p class="text-lg">Also know as {airline.alias}</p>
+              {/if}
 
-        {#if result.callsign}
-          <div class="px-4 pt-2 pb-4 rounded-md bg-ctp-mantle mt-2 border">
-            <h2 class="text-xl font-semibold">{result.callsign.callsign_icao} / {result.callsign.callsign_iata || "no iata"}</h2>
-            
-            <p class="text-lg mt-1">
-              Operated by {result.callsign.airline.name} ({result.callsign.airline.iata || "no iata"} / {result.callsign.airline.icao || "no icao"})
-            </p>
-
-            <p class="text-lg">
-              Origin: {result.callsign.origin.name} ({result.callsign.origin.iata_code || "no iata"} / {result.callsign.origin.icao_code || "no icao"})
-            </p>
-
-            <p class="text-lg">
-              Destination: {result.callsign.destination.name} ({result.callsign.destination.iata_code || "no iata"} / {result.callsign.destination.icao_code || "no icao"})
-            </p>
-          </div>
-        {/if}
-
-        {#if result.airlines.length > 0}
-          <div class="px-4 pt-2 pb-4 rounded-md bg-ctp-mantle mt-2 border">
-            <h2 class="text-xl font-semibold">Airlines</h2>
-            
-            {#each result.airlines as airline}
-              <div class="p-2 border rounded-md mt-2">
-                <h3 class="font-semibold">{airline.name} {
-                  airline.iata && airline.icao ? `(${airline.iata} / ${airline.icao})` : (
-                    airline.iata ? `(${airline.iata})` : (
-                      airline.icao ? `(${airline.icao})` : ""
-                    )
-                  )
-                }</h3>
-              </div>
-            {/each}
-          </div>
-        {/if}
+              <p class="mt-2">IATA code: {airline.iata || "N/A"}</p>
+              <p>ICAO code: {airline.icao || "N/A"}</p>
+              <p>Callsign: {airline.callsign || "N/A"}</p>
+              <p>Country: {airline.country || "N/A"}</p>
+            </div>
+          {/each}
+        </div>
       {:else if !searchFinished}
         <p class="mx-auto mt-8">Searching...</p>
       {:else}
@@ -164,7 +163,7 @@
     {/if}
   </div>
 
-  <div class="mt-auto">
+  <div class="mt-auto flex-shrink-0">
     <Navbar />
   </div>
 </main>

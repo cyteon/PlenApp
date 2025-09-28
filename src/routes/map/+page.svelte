@@ -268,7 +268,7 @@
 
               <div class="rounded-md p-2 border flex flex-col">
                 <p class="text-left">Velocity</p>
-                <p class="font-semibold text-lg">{selectedPlaneData.velocity ? `${(selectedPlaneData.velocity * 1.94384).toFixed(0)} ktsz` : "N/A"}</p>
+                <p class="font-semibold text-lg">{selectedPlaneData.velocity ? `${(selectedPlaneData.velocity * 1.94384).toFixed(0)} kts` : "N/A"}</p>
               </div>
 
               <div class="rounded-md p-2 border flex flex-col">
